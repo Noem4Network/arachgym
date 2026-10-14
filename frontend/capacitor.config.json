@@ -1,0 +1,9 @@
+{
+  "appId": "am.arachtech.arachgym",
+  "appName": "ArachGym",
+  "webDir": "dist",
+  "backgroundColor": "#1A1C23",
+  "android": {
+    "allowMixedContent": true
+  }
+}
