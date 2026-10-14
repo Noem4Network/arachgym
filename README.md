@@ -1,4 +1,4 @@
-# 🕷️ ArachGym
+# ArachGym
 
 > **ArachGym** is an advanced, privacy-first, fully-featured fitness tracking and workout management platform engineered by [ArachTech.am](https://arachtech.am).
 
