@@ -11,6 +11,8 @@ import { Button, Segmented } from '../components/ui.jsx'
 import { askAddDeviceData } from '../sheets.jsx'
 import { passwordOn, PasswordRegisterForm, openPasswordSignIn } from '../components/PasswordAuth.jsx'
 import { openDeviceLinkRedeem } from '../components/Passkeys.jsx'
+import ArachGymLogo from '../components/ArachGymLogo.jsx'
+import { motion } from 'framer-motion'
 
 function RegisterSheet({ close }) {
   const { setUser, pushState, pullState, loadConfig } = useStore()
@@ -76,12 +78,22 @@ export default function Login() {
     catch (e) { if (e.name !== 'NotAllowedError' && e.name !== 'AbortError') useUI.getState().toast(passkeyError(e, t('Sign-in failed'))) }
   }
   const head = <>
-    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
-      <img src="/icon-180.png" alt="ArachGym" style={{ width: 84, height: 84, borderRadius: 20, boxShadow: '0 8px 24px rgba(0, 229, 255, 0.25)' }} />
-    </div>
-    <h1 style={{ fontSize: 36, fontWeight: 800, letterSpacing: '-.028em', margin: '6px 0 4px', fontFamily: "'Montserrat', sans-serif" }}>
-      <span style={{ color: '#FFFFFF' }}>Arach</span><span style={{ color: '#00E5FF' }}>Gym</span>
-    </h1>
+    <motion.div
+      initial={{ scale: 0.85, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      transition={{ type: 'spring', stiffness: 350, damping: 20 }}
+      style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}
+    >
+      <ArachGymLogo size={96} variant="badge" />
+    </motion.div>
+    <motion.h1
+      initial={{ y: 8, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ delay: 0.08, duration: 0.3 }}
+      style={{ fontSize: 36, fontWeight: 800, letterSpacing: '-.028em', margin: '6px 0 4px', fontFamily: "'Montserrat', sans-serif" }}
+    >
+      <span style={{ color: '#FFFFFF' }}>Arach</span><span style={{ color: '#00E5FF', textShadow: '0 0 16px rgba(0, 229, 255, 0.45)' }}>Gym</span>
+    </motion.h1>
   </>
   const wrap = { display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: '78vh', textAlign: 'center' }
 

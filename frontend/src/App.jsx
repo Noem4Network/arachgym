@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef } from 'react'
 import { HashRouter, Routes, Route, Navigate, useNavigate, useLocation, useNavigationType } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useStore } from './store/useStore.js'
 import { useUI } from './store/useUI.js'
 import { bindUI } from './components/ui.jsx'
@@ -19,6 +20,8 @@ import { syncPushSubscription } from './lib/push.js'
 import { MOBILE } from './lib/mobile.js'
 import { exitWorkoutEdit, startFlow } from './sheets.jsx'
 import Icon from './components/Icon.jsx'
+import ArachGymLogo from './components/ArachGymLogo.jsx'
+import AnimatedRadialBackground from './components/AnimatedRadialBackground.jsx'
 import TabBar from './components/TabBar.jsx'
 import ErrorBoundary from './components/ErrorBoundary.jsx'
 import Modals from './components/Modals.jsx'
@@ -189,50 +192,75 @@ function Shell() {
 
   const authed = user || isGuest
   if (!ready && !authed) return (
-    <div id="app">
-      <div style={{ paddingTop: '44vh', display: 'flex', justifyContent: 'center', fontSize: 34, color: 'var(--label-3)' }}>
-        <Icon name="dumbbell" />
+    <motion.div
+      id="app"
+      className="splash-screen"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      <AnimatedRadialBackground />
+      <div className="splash-content">
+        <ArachGymLogo size={112} variant="splash" />
+        <div className="glass-loading-indicator" aria-label="Loading">
+          <span className="glass-loading-dot" />
+          <span className="glass-loading-dot" />
+          <span className="glass-loading-dot" />
+        </div>
       </div>
-    </div>
+    </motion.div>
   )
 
   return (
     <>
-      {/* keyed on the route: a view that throws is contained, and switching tabs
-          re-mounts the boundary, so the tab bar is always a way out */}
-      <div id="app" className="vfade" key={loc.pathname}>
-        <ErrorBoundary>
-          {!authed ? <Login /> : needsMobileOnboarding ? <MobileOnboarding /> : (
-            <Routes>
-              <Route path="/home" element={<Home />} />
-              {/* Gym check-in — switched off in Settings, the route falls through to the
-                  catch-all redirect below. */}
-              {S.checkIn !== false && <Route path="/checkin" element={<CheckIn />} />}
-              <Route path="/plan" element={<Plan />} />
-              <Route path="/plan/r/:id" element={<RoutineEdit />} />
-              <Route path="/workout" element={<Workout />} />
-              <Route path="/stats" element={<Stats />} />
-              <Route path="/history" element={<History />} />
-              <Route path="/library" element={<Library />} />
-              <Route path="/muscles" element={<Muscles />} />
-              <Route path="/structural-balance" element={<StructuralBalance />} />
-              <Route path="/progress-photos" element={<ProgressPhotos />} />
-              <Route path="/measurements" element={<Measurements />} />
-              <Route path="/settings" element={<SettingsRoute />} />
-              <Route path="/settings/:page" element={<SettingsRoute />} />
-              {/* The Coach screens gate themselves on the instance config; the routes exist
-                  unconditionally so a deep link from a notification lands somewhere sane
-                  rather than on the catch-all. */}
-              <Route path="/coach" element={<CoachChat />} />
-              <Route path="/coach/intake" element={<CoachIntake />} />
-              <Route path="/coach/proposal" element={<Navigate to="/coach" replace />} />
-              <Route path="/coach/setup" element={<CoachSetup />} />
-              <Route path="/admin" element={user?.admin ? <Admin /> : <Navigate to="/home" replace />} />
-              <Route path="*" element={<Navigate to="/home" replace />} />
-            </Routes>
-          )}
-        </ErrorBoundary>
-      </div>
+      {/* Animated slow-moving radial gradient background in the root layout */}
+      <AnimatedRadialBackground />
+
+      {/* keyed on the route with AnimatePresence for silky page transitions */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          id="app"
+          key={loc.pathname}
+          initial={{ opacity: 0, y: 7, filter: 'blur(3px)' }}
+          animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+          exit={{ opacity: 0, y: -5, filter: 'blur(2px)' }}
+          transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+          className="vfade"
+        >
+          <ErrorBoundary>
+            {!authed ? <Login /> : needsMobileOnboarding ? <MobileOnboarding /> : (
+              <Routes location={loc}>
+                <Route path="/home" element={<Home />} />
+                {/* Gym check-in — switched off in Settings, the route falls through to the
+                    catch-all redirect below. */}
+                {S.checkIn !== false && <Route path="/checkin" element={<CheckIn />} />}
+                <Route path="/plan" element={<Plan />} />
+                <Route path="/plan/r/:id" element={<RoutineEdit />} />
+                <Route path="/workout" element={<Workout />} />
+                <Route path="/stats" element={<Stats />} />
+                <Route path="/history" element={<History />} />
+                <Route path="/library" element={<Library />} />
+                <Route path="/muscles" element={<Muscles />} />
+                <Route path="/structural-balance" element={<StructuralBalance />} />
+                <Route path="/progress-photos" element={<ProgressPhotos />} />
+                <Route path="/measurements" element={<Measurements />} />
+                <Route path="/settings" element={<SettingsRoute />} />
+                <Route path="/settings/:page" element={<SettingsRoute />} />
+                {/* The Coach screens gate themselves on the instance config; the routes exist
+                    unconditionally so a deep link from a notification lands somewhere sane
+                    rather than on the catch-all. */}
+                <Route path="/coach" element={<CoachChat />} />
+                <Route path="/coach/intake" element={<CoachIntake />} />
+                <Route path="/coach/proposal" element={<Navigate to="/coach" replace />} />
+                <Route path="/coach/setup" element={<CoachSetup />} />
+                <Route path="/admin" element={user?.admin ? <Admin /> : <Navigate to="/home" replace />} />
+                <Route path="*" element={<Navigate to="/home" replace />} />
+              </Routes>
+            )}
+          </ErrorBoundary>
+        </motion.div>
+      </AnimatePresence>
       {/* Outside #app: the view's fade-in animates a transform, and a fixed element inside it
           would ride along with the page for the length of it. Decides for itself when to show —
           including on the sign-in screen, when the server has just ended the session. */}

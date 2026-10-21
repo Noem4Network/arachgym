@@ -14,6 +14,7 @@
 //   · focus-visible draws a ring; pointer interaction never does
 
 import { useRef, useState, useEffect, useCallback, forwardRef } from 'react'
+import { motion } from 'framer-motion'
 import Icon from './Icon.jsx'
 import { sheetKeyboardInsets } from '../lib/use-sheet-keyboard.js'
 import { NATIVE_KEYBOARD_EVENT } from '../lib/native-keyboard.js'
@@ -122,15 +123,17 @@ export function Segmented({ options, value, onChange, className = '' }) {
     <div className={'seg ' + className} style={{ '--n': options.length, '--i': i }}>
       <span className="seg-sel" aria-hidden="true" />
       {options.map(o => (
-        <button
+        <motion.button
           key={o.value}
+          whileTap={{ scale: 0.94 }}
+          transition={{ type: 'spring', stiffness: 500, damping: 25 }}
           className={o.value === value ? 'on' : ''}
           aria-pressed={o.value === value}
           onClick={() => onChange(o.value)}
         >
           {o.icon && <Icon name={o.icon} />}
           {o.label && <span>{o.label}</span>}
-        </button>
+        </motion.button>
       ))}
     </div>
   )
@@ -285,7 +288,9 @@ export function Slider({ value, min = 0, max = 100, step = 1, onChange, classNam
 
 export function Check({ checked, onChange, className = '', size, label }) {
   return (
-    <button
+    <motion.button
+      whileTap={{ scale: 0.86 }}
+      transition={{ type: 'spring', stiffness: 500, damping: 22 }}
       role="checkbox"
       aria-checked={!!checked}
       aria-label={label}
@@ -294,7 +299,7 @@ export function Check({ checked, onChange, className = '', size, label }) {
       onClick={() => onChange(!checked)}
     >
       <Icon name="check" />
-    </button>
+    </motion.button>
   )
 }
 
@@ -314,9 +319,29 @@ export function Section({ title, footer, children, className = '' }) {
 }
 
 export function Row({ icon, iconTint, title, subtitle, value, accessory = 'none', onClick, danger, children, className = '' }) {
-  const Tag = onClick ? 'button' : 'div'
+  if (onClick) {
+    return (
+      <motion.button
+        whileHover={{ scale: 1.01 }}
+        whileTap={{ scale: 0.985 }}
+        transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+        className={'lrow tap' + (danger ? ' danger' : '') + ' ' + className}
+        onClick={onClick}
+      >
+        {icon && <span className="lrow-i" style={iconTint ? { '--tint': iconTint } : null}><Icon name={icon} /></span>}
+        <span className="lrow-m">
+          <span className="lrow-t">{title}</span>
+          {subtitle && <span className="lrow-s">{subtitle}</span>}
+        </span>
+        {children}
+        {value != null && <span className="lrow-v">{value}</span>}
+        {accessory === 'chevron' && <Icon name="chevronRight" className="lrow-c" />}
+        {accessory === 'check' && <Icon name="check" className="lrow-k" />}
+      </motion.button>
+    )
+  }
   return (
-    <Tag className={'lrow' + (onClick ? ' tap' : '') + (danger ? ' danger' : '') + ' ' + className} onClick={onClick}>
+    <div className={'lrow' + (danger ? ' danger' : '') + ' ' + className}>
       {icon && <span className="lrow-i" style={iconTint ? { '--tint': iconTint } : null}><Icon name={icon} /></span>}
       <span className="lrow-m">
         <span className="lrow-t">{title}</span>
@@ -326,7 +351,7 @@ export function Row({ icon, iconTint, title, subtitle, value, accessory = 'none'
       {value != null && <span className="lrow-v">{value}</span>}
       {accessory === 'chevron' && <Icon name="chevronRight" className="lrow-c" />}
       {accessory === 'check' && <Icon name="check" className="lrow-k" />}
-    </Tag>
+    </div>
   )
 }
 
@@ -494,10 +519,16 @@ function require_ui() {
 
 export function Button({ variant = 'plain', size, icon, trailingIcon, children, className = '', ...rest }) {
   return (
-    <button className={`btn ${variant}${size ? ' ' + size : ''} ${className}`} {...rest}>
+    <motion.button
+      whileHover={{ scale: 1.02, filter: 'brightness(1.05)' }}
+      whileTap={{ scale: 0.96 }}
+      transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+      className={`btn ${variant}${size ? ' ' + size : ''} ${className}`}
+      {...rest}
+    >
       {icon && <Icon name={icon} />}
       {children && <span>{children}</span>}
       {trailingIcon && <Icon name={trailingIcon} />}
-    </button>
+    </motion.button>
   )
 }
